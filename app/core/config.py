@@ -70,7 +70,7 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379"
     
     # CORS
-    ALLOWED_ORIGINS: List[str] = ["*"]  # Temporarily allow all origins for testing
+    ALLOWED_ORIGINS: Union[List[str], str] = ["*"]  # Temporarily allow all origins for testing
     ALLOWED_HOSTS: List[str] = ["*"]
     
     @field_validator('ALLOWED_ORIGINS', mode='before')

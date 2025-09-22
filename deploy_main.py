@@ -49,9 +49,20 @@ app = FastAPI(
 )
 
 # Add CORS middleware
+# Default origins including Vercel frontend
+default_origins = [
+    "https://healthcare-frontend-3.vercel.app",
+    "https://healthcare-frontend-3.vercel.app/",
+    "http://localhost:3000",
+    "http://localhost:8080"
+]
+
+allowed_origins = os.getenv("ALLOWED_ORIGINS", ",".join(default_origins)).split(",")
+print(f"🌐 CORS Allowed Origins: {allowed_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("ALLOWED_ORIGINS", "http://localhost:8080").split(","),
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
