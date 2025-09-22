@@ -62,7 +62,7 @@ async def patient_login(
             )
 
         # Determine user role
-        if is_superuser:
+        if is_superuser is True:
             user_role = "admin"
         elif "doctor" in email.lower():
             user_role = "doctor"

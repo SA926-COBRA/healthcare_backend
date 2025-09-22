@@ -29,7 +29,10 @@ async def login(
     
     try:
         # Check if we're in mock mode
-        if os.getenv("USE_DATABASE", "false").lower() == "false":
+        use_database = os.getenv("USE_DATABASE", "false")
+        print(f"DEBUG: USE_DATABASE = {use_database}")
+        print(f"DEBUG: use_database.lower() == 'false': {use_database.lower() == 'false'}")
+        if use_database.lower() == "false":
             # Mock login for development
             if login_data.email_or_cpf == "admin@prontivus.com" and login_data.password == "admin123":
                 return Token(
@@ -91,6 +94,7 @@ async def login(
         pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
         
         # Find user by email or CPF using direct SQL
+        print(f"DEBUG: Looking for user with email_or_cpf: {login_data.email_or_cpf}")
         cursor = db.execute(text("""
             SELECT id, email, username, hashed_password, is_active, tenant_id, is_superuser
             FROM users
@@ -98,7 +102,9 @@ async def login(
         """), {"email_or_cpf": login_data.email_or_cpf})
 
         user_row = cursor.fetchone()
+        print(f"DEBUG: User row found: {user_row}")
         if not user_row:
+            print("DEBUG: No user found, raising 401")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials"
@@ -121,7 +127,7 @@ async def login(
             )
 
         # Determine user role
-        if is_superuser:
+        if is_superuser is True:
             user_role = "admin"
         elif "doctor" in email.lower():
             user_role = "doctor"

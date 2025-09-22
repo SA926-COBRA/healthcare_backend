@@ -45,7 +45,7 @@ async def login(
         # Find user by email or CPF using direct SQL to avoid relationship issues
         from sqlalchemy import text
         cursor = db.execute(text("""
-            SELECT id, email, full_name, hashed_password, is_active, tenant_id
+            SELECT id, email, full_name, hashed_password, is_active, tenant_id, is_superuser
             FROM users 
             WHERE email = :email_or_cpf OR cpf = :email_or_cpf
         """), {"email_or_cpf": login_data.email_or_cpf})
@@ -64,7 +64,8 @@ async def login(
             'full_name': user_row[2],
             'hashed_password': user_row[3],
             'is_active': user_row[4],
-            'tenant_id': user_row[5]
+            'tenant_id': user_row[5],
+            'is_superuser': user_row[6]
         })()
         
         # Check if user is active
@@ -74,11 +75,11 @@ async def login(
                 detail="Account is deactivated"
             )
         
-        # Verify password using SHA-256 (our database format)
-        import hashlib
-        password_hash = hashlib.sha256(login_data.password.encode()).hexdigest()
+        # Verify password using bcrypt (our database format)
+        from passlib.context import CryptContext
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
         
-        if password_hash != user.hashed_password:
+        if not pwd_context.verify(login_data.password, user.hashed_password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials"
