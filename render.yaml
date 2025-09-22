@@ -7,7 +7,7 @@ services:
     startCommand: python deploy_main.py
     envVars:
       - key: DATABASE_URL
-        sync: false  # Set this manually in Render dashboard
+        value: postgresql://prontivus_db_user:5lI6ouhUVLAuzL3ovjH8Hc929O60IuPU@dpg-d38kvh15pdvs738m7np0-a.oregon-postgres.render.com/prontivus_db
       - key: SECRET_KEY
         generateValue: true
       - key: ENVIRONMENT
@@ -25,8 +25,8 @@ services:
       - key: HOST
         value: 0.0.0.0
 
-databases:
-  - name: prontivus-db
-    plan: free
-    databaseName: prontivus_db
-    user: prontivus_user
+# Database already exists on Render.com
+# Database Name: postgres
+# Username: prontivus_db_user
+# Database: prontivus_db
+# Connection: dpg-d38kvh15pdvs738m7np0-a.oregon-postgres.render.com:5432
