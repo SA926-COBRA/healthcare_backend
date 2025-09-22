@@ -16,6 +16,22 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+# Set environment variables explicitly for Render deployment
+if not os.getenv("DATABASE_URL"):
+    os.environ["DATABASE_URL"] = "postgresql://prontivus_db_user:5lI6ouhUVLAuzL3ovjH8Hc929O60IuPU@dpg-d38kvh15pdvs738m7np0-a.oregon-postgres.render.com/prontivus_db"
+
+if not os.getenv("USE_SQLITE"):
+    os.environ["USE_SQLITE"] = "false"
+
+if not os.getenv("USE_DATABASE"):
+    os.environ["USE_DATABASE"] = "true"
+
+if not os.getenv("ENVIRONMENT"):
+    os.environ["ENVIRONMENT"] = "production"
+
+if not os.getenv("DEBUG"):
+    os.environ["DEBUG"] = "false"
+
 # Add current directory to Python path
 sys.path.insert(0, str(Path(__file__).parent))
 
