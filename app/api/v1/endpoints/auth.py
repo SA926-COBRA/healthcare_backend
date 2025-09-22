@@ -81,12 +81,11 @@ async def login(
                     detail="Invalid credentials"
                 )
         
-        # Real database mode - use simple auth service
-        from simple_auth_service import SimpleAuthService
-        simple_auth = SimpleAuthService()
+        # Real database mode - use proper auth service
+        auth_service = AuthService()
         
         # Authenticate user
-        user = simple_auth.authenticate_user(login_data.email_or_cpf, login_data.password)
+        user = auth_service.authenticate_user(login_data.email_or_cpf, login_data.password, db)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
