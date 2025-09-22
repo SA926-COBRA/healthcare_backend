@@ -1,36 +1,32 @@
 """
-Patient Portal Authentication Endpoints
-Patients can only access the patient portal, not the main system
+Simple authentication endpoint that bypasses complex ORM relationships
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from typing import Any
+from passlib.context import CryptContext
+from jose import jwt
+from datetime import datetime, timedelta
 
 from app.database.database import get_db
-from app.core.exceptions import AuthenticationError, ValidationError
 from app.schemas.auth import Token, UserLogin
 from app.core.config import settings
 
 router = APIRouter()
 
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
+
 @router.post("/login", response_model=Token)
-async def patient_login(
+async def simple_login(
     login_data: UserLogin,
     request: Request,
     db: Session = Depends(get_db)
 ) -> Any:
-    """Patient portal login - Only patients allowed"""
+    """Simple login using direct SQL queries"""
     try:
-        # Use simple SQL-based authentication
-        from sqlalchemy import text
-        from passlib.context import CryptContext
-        from jose import jwt
-        from datetime import datetime, timedelta
-        
-        # Password hashing
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
-        
         # Find user by email or CPF using direct SQL
         cursor = db.execute(text("""
             SELECT id, email, username, hashed_password, is_active, tenant_id, is_superuser
@@ -113,21 +109,5 @@ async def patient_login(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Internal server error: {str(e)}"
-        )
-
-@router.post("/logout")
-async def patient_logout(
-    request: Request,
-    db: Session = Depends(get_db)
-) -> Any:
-    """Patient portal logout"""
-    try:
-        # Simple logout - just return success
-        return {"message": "Logged out successfully from patient portal"}
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Logout error: {str(e)}"
+            detail=f"Login failed: {str(e)}"
         )

@@ -101,10 +101,11 @@ class Tenant(Base):
     # Related entities
     users = relationship("User", back_populates="tenant", foreign_keys="User.tenant_id")
     user_roles = relationship("UserRole", back_populates="tenant")
-    patients = relationship("Patient", back_populates="tenant")
-    appointments = relationship("Appointment", back_populates="tenant")
-    medical_records = relationship("MedicalRecord", back_populates="tenant")
-    prescriptions = relationship("Prescription", back_populates="tenant")
+    # Temporarily disabled to avoid circular import issues
+    # patients = relationship("Patient", back_populates="tenant", lazy="select")
+    # appointments = relationship("Appointment", back_populates="tenant")
+    # medical_records = relationship("MedicalRecord", back_populates="tenant")
+    # prescriptions = relationship("Prescription", back_populates="tenant")
     # Temporarily commented out to avoid circular dependencies
     # checkins = relationship("PatientCheckIn", back_populates="tenant")
     # documents = relationship("PatientDocument", back_populates="tenant")
