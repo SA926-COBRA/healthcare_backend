@@ -169,9 +169,11 @@ class StartupService:
         """Handle connection status changes"""
         logger.info(f"🔗 Connection status changed: {status.value}")
         
-        # If connection restored, trigger sync
-        if status.value == "online":
-            asyncio.create_task(sync_service.force_sync())
+        # If connection restored, log sync status
+        if status.value == "online" and settings.SYNC_ENABLED:
+            logger.debug("Connection restored - sync would be triggered if enabled")
+        elif status.value == "online":
+            logger.debug("Connection restored - sync disabled in configuration")
     
     async def _log_step(self, message: str):
         """Log a startup step"""

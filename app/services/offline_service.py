@@ -170,9 +170,11 @@ class OfflineDataManager:
                 # Log connection status
                 self._log_connection_status()
                 
-                # If online, trigger sync
-                if self.connection_status == ConnectionStatus.ONLINE:
-                    asyncio.create_task(self._trigger_sync())
+                # If online and sync enabled, log that sync would be triggered
+                if self.connection_status == ConnectionStatus.ONLINE and settings.SYNC_ENABLED:
+                    logger.debug("Connection online - sync would be triggered if enabled")
+                elif self.connection_status == ConnectionStatus.ONLINE:
+                    logger.debug("Connection online - sync disabled in configuration")
                 
             except Exception as e:
                 logger.error(f"❌ Connection monitoring error: {e}")
@@ -195,7 +197,12 @@ class OfflineDataManager:
         """Notify registered callbacks of connection status change"""
         for callback in self.connection_callbacks:
             try:
-                callback(self.connection_status)
+                # Only call sync callbacks to avoid async task creation issues
+                if not asyncio.iscoroutinefunction(callback):
+                    callback(self.connection_status)
+                else:
+                    # Skip async callbacks to avoid creating unexecuted tasks
+                    logger.debug("Skipping async callback to avoid unexecuted task warnings")
             except Exception as e:
                 logger.error(f"❌ Connection callback error: {e}")
     

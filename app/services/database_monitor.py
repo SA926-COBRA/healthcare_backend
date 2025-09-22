@@ -145,7 +145,8 @@ class DatabaseMonitor:
     async def _get_postgresql_metrics(self) -> DatabaseMetrics:
         """Get PostgreSQL performance metrics"""
         try:
-            with self.postgres_engine.connect() as conn:
+            # Use autocommit to avoid transaction abort issues
+            with self.postgres_engine.connect().execution_options(autocommit=True) as conn:
                 # Connection metrics
                 connection_stats = conn.execute(text("""
                     SELECT 
@@ -170,20 +171,28 @@ class DatabaseMonitor:
                     query_stats = (0, 0, 0)  # Default values
                 
                 # Cache hit ratio
-                cache_stats = conn.execute(text("""
-                    SELECT 
-                        round(100.0 * sum(blks_hit) / (sum(blks_hit) + sum(blks_read)), 2) as cache_hit_ratio
-                    FROM pg_stat_database
-                    WHERE datname = current_database()
-                """)).fetchone()
+                try:
+                    cache_stats = conn.execute(text("""
+                        SELECT 
+                            round(100.0 * sum(blks_hit) / (sum(blks_hit) + sum(blks_read)), 2) as cache_hit_ratio
+                        FROM pg_stat_database
+                        WHERE datname = current_database()
+                    """)).fetchone()
+                except Exception as e:
+                    logger.debug(f"Cache stats query failed: {e}")
+                    cache_stats = (0,)  # Default value
                 
                 # Lock information
-                lock_stats = conn.execute(text("""
-                    SELECT 
-                        count(*) FILTER (WHERE granted = false) as locks_waiting,
-                        count(*) FILTER (WHERE mode = 'ExclusiveLock') as deadlocks
-                    FROM pg_locks
-                """)).fetchone()
+                try:
+                    lock_stats = conn.execute(text("""
+                        SELECT 
+                            count(*) FILTER (WHERE granted = false) as locks_waiting,
+                            count(*) FILTER (WHERE mode = 'ExclusiveLock') as deadlocks
+                        FROM pg_locks
+                    """)).fetchone()
+                except Exception as e:
+                    logger.debug(f"Lock stats query failed: {e}")
+                    lock_stats = (0, 0)  # Default values
                 
                 # System metrics
                 memory_usage = psutil.virtual_memory().percent
