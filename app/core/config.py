@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     DB_POOL_PRE_PING: bool = True
     
     # Sync Configuration
-    SYNC_ENABLED: bool = True
+    SYNC_ENABLED: bool = False  # Disabled for production PostgreSQL-only mode
     SYNC_INTERVAL_SECONDS: int = 300  # 5 minutes
     SYNC_BATCH_SIZE: int = 1000
     SYNC_CONFLICT_RESOLUTION: str = "postgresql_wins"  # postgresql_wins, sqlite_wins, manual
@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     SYNC_RETRY_DELAY: int = 5
     
     # Offline Mode Settings
-    OFFLINE_MODE_ENABLED: bool = True
+    OFFLINE_MODE_ENABLED: bool = False  # Disabled for production PostgreSQL-only mode
     OFFLINE_DATA_RETENTION_DAYS: int = 30
     OFFLINE_SYNC_ON_STARTUP: bool = True
     OFFLINE_CONFLICT_NOTIFICATION: bool = True

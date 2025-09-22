@@ -73,6 +73,11 @@ class DatabaseSyncService:
     def _initialize_engines(self):
         """Initialize database engines for both PostgreSQL and SQLite"""
         try:
+            # Only initialize engines if sync is enabled
+            if not settings.SYNC_ENABLED:
+                logger.info("⚠️ Sync service disabled - skipping engine initialization")
+                return
+            
             # PostgreSQL engine
             # Prioritize environment variable over settings default
             postgres_url = os.getenv("DATABASE_URL", settings.DATABASE_URL)
@@ -112,14 +117,19 @@ class DatabaseSyncService:
             "is_syncing": self.is_syncing,
             "queue_size": len(self.sync_queue),
             "conflict_count": len(self.conflict_queue),
-            "last_sync": self._get_last_sync_time(),
+            "last_sync": self._get_last_sync_time() if settings.SYNC_ENABLED else None,
             "sync_enabled": settings.SYNC_ENABLED,
-            "conflict_resolution": settings.SYNC_CONFLICT_RESOLUTION
+            "conflict_resolution": settings.SYNC_CONFLICT_RESOLUTION,
+            "engines_initialized": self.postgres_engine is not None and self.sqlite_engine is not None
         }
     
     def _get_last_sync_time(self) -> Optional[datetime]:
         """Get the last successful sync time"""
         try:
+            # Check if engines are initialized
+            if not self.postgres_engine:
+                return None
+                
             # Check sync log table if it exists
             with self.postgres_engine.connect() as conn:
                 result = conn.execute(text("""

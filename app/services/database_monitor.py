@@ -155,14 +155,19 @@ class DatabaseMonitor:
                     FROM pg_stat_activity
                 """)).fetchone()
                 
-                # Query performance metrics
-                query_stats = conn.execute(text("""
-                    SELECT 
-                        count(*) as query_count,
-                        avg(mean_exec_time) as avg_query_time,
-                        count(*) FILTER (WHERE mean_exec_time > 1000) as slow_queries
-                    FROM pg_stat_statements
-                """)).fetchone()
+                # Query performance metrics (check if pg_stat_statements extension exists)
+                try:
+                    query_stats = conn.execute(text("""
+                        SELECT 
+                            count(*) as query_count,
+                            avg(mean_exec_time) as avg_query_time,
+                            count(*) FILTER (WHERE mean_exec_time > 1000) as slow_queries
+                        FROM pg_stat_statements
+                    """)).fetchone()
+                except Exception as e:
+                    # pg_stat_statements extension not available (common in managed databases)
+                    logger.debug(f"pg_stat_statements not available: {e}")
+                    query_stats = (0, 0, 0)  # Default values
                 
                 # Cache hit ratio
                 cache_stats = conn.execute(text("""
