@@ -152,29 +152,64 @@ async def register_staff(
 ) -> Any:
     """Register staff member - Database only"""
     try:
-        auth_service = AuthService(db)
+        from sqlalchemy import text
+        from passlib.context import CryptContext
         
-        # Check if user already exists
-        existing_user = auth_service.get_user_by_email(staff_data.email)
+        # Password hashing
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
+        
+        # Check if user already exists using direct SQL
+        cursor = db.execute(text("""
+            SELECT id FROM users WHERE email = :email
+        """), {"email": staff_data.email})
+        
+        existing_user = cursor.fetchone()
         if existing_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User with this email already exists"
             )
         
-        # Create new staff user
-        user = auth_service.create_staff_user(staff_data)
+        # Hash password
+        hashed_password = pwd_context.hash(staff_data.password)
+        
+        # Determine if user is superuser based on role
+        is_superuser = staff_data.role == "admin"
+        
+        # Create new staff user using direct SQL
+        cursor = db.execute(text("""
+            INSERT INTO users (
+                tenant_id, email, username, full_name, hashed_password,
+                is_active, is_verified, is_superuser, must_reset_password,
+                created_at, updated_at
+            ) VALUES (
+                :tenant_id, :email, :username, :full_name, :hashed_password,
+                true, true, :is_superuser, false,
+                NOW(), NOW()
+            ) RETURNING id
+        """), {
+            "tenant_id": staff_data.tenant_id or 1,  # Default to tenant 1
+            "email": staff_data.email,
+            "username": staff_data.username,
+            "full_name": staff_data.full_name,
+            "hashed_password": hashed_password,
+            "is_superuser": is_superuser
+        })
+        
+        user_id = cursor.fetchone()[0]
+        db.commit()
         
         return {
             "message": "Staff member created successfully",
-            "user_id": user.id,
-            "email": user.email,
-            "must_reset_password": True
+            "user_id": user_id,
+            "email": staff_data.email,
+            "must_reset_password": False
         }
         
     except HTTPException:
         raise
     except Exception as e:
+        db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Registration failed: {str(e)}"
