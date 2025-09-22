@@ -32,18 +32,18 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # Database Configuration
-    DATABASE_URL: str = "postgresql://user:password@localhost/prontivus"
-    DATABASE_URL_ASYNC: str = "postgresql+asyncpg://user:password@localhost/prontivus"
+    DATABASE_URL: str = "postgresql://prontibus_user:j1TNfXAeaD1fyNY5RPV68psq0JmwodLV@dpg-d38mtsogjchc73d6ovdg-a.oregon-postgres.render.com/prontibus"
+    DATABASE_URL_ASYNC: str = "postgresql+asyncpg://prontibus_user:j1TNfXAeaD1fyNY5RPV68psq0JmwodLV@dpg-d38mtsogjchc73d6ovdg-a.oregon-postgres.render.com/prontibus"
     SQLITE_URL: str = "sqlite:///./prontivus_offline.db"
-    USE_SQLITE: bool = True
+    USE_SQLITE: bool = False
     
     # PostgreSQL Production Settings
-    POSTGRES_HOST: str = "localhost"
+    POSTGRES_HOST: str = "dpg-d38mtsogjchc73d6ovdg-a.oregon-postgres.render.com"
     POSTGRES_PORT: int = 5432
-    POSTGRES_DB: str = "prontivus"
-    POSTGRES_USER: str = "prontivus_user"
-    POSTGRES_PASSWORD: str = "prontivus_password"
-    POSTGRES_SSL_MODE: str = "prefer"  # prefer, require, disable
+    POSTGRES_DB: str = "prontibus"
+    POSTGRES_USER: str = "prontibus_user"
+    POSTGRES_PASSWORD: str = "j1TNfXAeaD1fyNY5RPV68psq0JmwodLV"
+    POSTGRES_SSL_MODE: str = "require"  # require for Render.com
     
     # Connection Pool Settings
     DB_POOL_SIZE: int = 20
