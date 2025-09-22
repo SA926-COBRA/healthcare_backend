@@ -18,7 +18,7 @@ load_dotenv()
 
 # Set environment variables explicitly for Render deployment
 if not os.getenv("DATABASE_URL"):
-    os.environ["DATABASE_URL"] = "postgresql://prontivus_db_user:5lI6ouhUVLAuzL3ovjH8Hc929O60IuPU@dpg-d38kvh15pdvs738m7np0-a.oregon-postgres.render.com/prontivus_db"
+    os.environ["DATABASE_URL"] = "postgresql://prontibus_user:j1TNfXAeaD1fyNY5RPV68psq0JmwodLV@dpg-d38mtsogjchc73d6ovdg-a.oregon-postgres.render.com/prontibus"
 
 if not os.getenv("USE_SQLITE"):
     os.environ["USE_SQLITE"] = "false"

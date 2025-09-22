@@ -74,8 +74,10 @@ class DatabaseSyncService:
         """Initialize database engines for both PostgreSQL and SQLite"""
         try:
             # PostgreSQL engine
+            # Prioritize environment variable over settings default
+            postgres_url = os.getenv("DATABASE_URL", settings.DATABASE_URL)
             self.postgres_engine = create_engine(
-                settings.DATABASE_URL,
+                postgres_url,
                 echo=False,
                 pool_pre_ping=True,
                 pool_recycle=3600,

@@ -43,7 +43,14 @@ def get_engine():
             print("📱 Using SQLite database (Offline Mode)")
         else:
             # Use PostgreSQL for online production with optimized settings
-            DATABASE_URL = settings.DATABASE_URL
+            # Prioritize environment variable over settings default
+            DATABASE_URL = os.getenv("DATABASE_URL", settings.DATABASE_URL)
+            
+            # Debug logging for deployment
+            print(f"🔗 Database URL: {DATABASE_URL[:50]}...")  # Show first 50 chars for security
+            print(f"📊 Pool size: {settings.DB_POOL_SIZE}")
+            print(f"🔄 Max overflow: {settings.DB_MAX_OVERFLOW}")
+            print(f"🔒 SSL mode: {settings.POSTGRES_SSL_MODE}")
             
             # Build connection arguments for production
             connect_args = {

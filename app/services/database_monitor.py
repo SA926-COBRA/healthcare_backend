@@ -5,6 +5,7 @@ Provides real-time monitoring, performance metrics, and health checks
 
 import asyncio
 import logging
+import os
 import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
@@ -73,8 +74,10 @@ class DatabaseMonitor:
         """Initialize database engines for monitoring"""
         try:
             # PostgreSQL engine for monitoring
+            # Prioritize environment variable over settings default
+            postgres_url = os.getenv("DATABASE_URL", settings.DATABASE_URL)
             self.postgres_engine = create_engine(
-                settings.DATABASE_URL,
+                postgres_url,
                 echo=False,
                 pool_pre_ping=True,
                 pool_recycle=3600,

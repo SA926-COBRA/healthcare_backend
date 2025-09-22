@@ -7,7 +7,7 @@ services:
     startCommand: python deploy_main.py
     envVars:
       - key: DATABASE_URL
-        value: postgresql://prontivus_db_user:5lI6ouhUVLAuzL3ovjH8Hc929O60IuPU@dpg-d38kvh15pdvs738m7np0-a.oregon-postgres.render.com/prontivus_db
+        value: postgresql://prontibus_user:j1TNfXAeaD1fyNY5RPV68psq0JmwodLV@dpg-d38mtsogjchc73d6ovdg-a.oregon-postgres.render.com/prontibus
       - key: SECRET_KEY
         generateValue: true
       - key: ENVIRONMENT
@@ -19,7 +19,7 @@ services:
       - key: USE_DATABASE
         value: true
       - key: ALLOWED_ORIGINS
-        value: https://prontivus-frontend.onrender.com,http://localhost:8080,https://healthcare-backend-1-3c6k.onrender.com
+        value: https://healthcare-frontend-3.vercel.app,https://healthcare-frontend-3.vercel.app/,http://localhost:3000,http://localhost:8080
       - key: PORT
         value: 10000
       - key: HOST
