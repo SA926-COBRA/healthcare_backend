@@ -82,35 +82,11 @@ async def login(
                 )
         
         # Real database mode - use proper auth service
-        auth_service = AuthService()
+        auth_service = AuthService(db)
         
         # Authenticate user
-        user = auth_service.authenticate_user(login_data.email_or_cpf, login_data.password, db)
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid credentials"
-            )
-        
-        # Create token
-        access_token = simple_auth.create_access_token(
-            data={"sub": user.username, "user_id": user.id, "tenant_id": user.tenant_id}
-        )
-        
-        # Determine user type and role
-        user_role = "admin" if user.is_superuser else "doctor" if user.crm else "secretary"
-        user_type = "staff"
-        
-        return Token(
-            access_token=access_token,
-            refresh_token="refresh-token",  # Simplified for now
-            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-            user_id=user.id,
-            user_role=user_role,
-            user_type=user_type,
-            requires_2fa=False,
-            must_reset_password=False
-        )
+        token = auth_service.authenticate_user(login_data.email_or_cpf, login_data.password, request)
+        return token
         
     except HTTPException:
         raise
